@@ -309,6 +309,13 @@
             border-color: #ffcc00;
         }
 
+        /* Student Card Hover Effect */
+        .project-card[data-project="student"]:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 0 30px rgba(0, 150, 255, 0.5);
+            border-color: #0099ff;
+        }
+
         .project-icon {
             font-size: clamp(3rem, 10vw, 4.8rem);
             margin-bottom: 1rem;
@@ -600,6 +607,12 @@
                 <div class="project-icon">🏆</div>
                 <h2 class="project-title">Tournament Management System</h2>
                 <p class="project-description">Complete tournament organization, match scheduling, and score tracking platform.</p>
+            </a>
+
+            <a href="student/index.html" class="project-card" data-project="student">
+                <div class="project-icon">🧑‍🎓👩‍🎓📚</div>
+                <h2 class="project-title">Student Management System</h2>
+                <p class="project-description">Complete student management system - admission, results, attendance & fee management.</p>
             </a>
         </div>
 
