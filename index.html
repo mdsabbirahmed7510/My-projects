@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MD. SABBIR AHMED | Smart Parking & Tournament System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* LIGHT MODE - Sun Light Effect */
+        body.light {
+            background: linear-gradient(135deg, #f5a623, #f7d794, #ffeaa7);
+            color: #1a1a2e;
+        }
+
+        body.light .sun-container {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 10;
+        }
+
+        body.light .sun {
+            width: 70px;
+            height: 70px;
+            background: radial-gradient(circle, #fff9c4, #ffeb3b, #ff9800);
+            border-radius: 50%;
+            box-shadow: 0 0 40px rgba(255, 235, 59, 0.8);
+            animation: sunGlow 2s infinite alternate;
+            cursor: pointer;
+        }
+
+        @keyframes sunGlow {
+            0% { box-shadow: 0 0 30px rgba(255, 235, 59, 0.6); width: 70px; height: 70px; }
+            100% { box-shadow: 0 0 60px rgba(255, 235, 59, 0.9); width: 75px; height: 75px; }
+        }
+
+        /* Sun Rays Effect - From Right Side */
+        body.light::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(ellipse, rgba(255,235,59,0.4), transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* DARK MODE - Moon Light Effect */
+        body.dark {
+            background: linear-gradient(135deg, #0b1120, #1a1a3e, #0f172a);
+            color: #e0e0e0;
+        }
+
+        body.dark .moon-container {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 10;
+        }
+
+        body.dark .moon {
+            width: 65px;
+            height: 65px;
+            background: radial-gradient(circle, #f5f5dc, #e0e0c0, #c0c0a0);
+            border-radius: 50%;
+            box-shadow: 0 0 30px rgba(220, 220, 200, 0.5);
+            animation: moonGlow 2s infinite alternate;
+            cursor: pointer;
+            position: relative;
+        }
+
+        /* Moon Craters */
+        body.dark .moon::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 12px;
+            width: 12px;
+            height: 12px;
+            background: rgba(100, 100, 80, 0.4);
+            border-radius: 50%;
+        }
+
+        body.dark .moon::after {
+            content: '';
+            position: absolute;
+            bottom: 18px;
+            right: 15px;
+            width: 10px;
+            height: 10px;
+            background: rgba(100, 100, 80, 0.4);
+            border-radius: 50%;
+        }
+
+        @keyframes moonGlow {
+            0% { box-shadow: 0 0 20px rgba(220, 220, 200, 0.4); width: 65px; height: 65px; }
+            100% { box-shadow: 0 0 45px rgba(220, 220, 200, 0.7); width: 70px; height: 70px; }
+        }
+
+        /* Moon Light Beam - From Right Side */
+        body.dark::before {
+            content: '';
+            position: absolute;
+            top: -40px;
+            right: -40px;
+            width: 280px;
+            height: 280px;
+            background: radial-gradient(ellipse, rgba(200,200,180,0.2), transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Header Section */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 50px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .title-left h1 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            background: linear-gradient(135deg, #fff, #f5b042, #ff6a88);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+            white-space: nowrap;
+        }
+
+        body.light .title-left h1 {
+            background: linear-gradient(135deg, #2c3e50, #e67e22, #d35400);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        /* Theme Toggle - Slide Switch (Top Right area) */
+        .theme-switch-wrapper {
+            display: flex;
+            align-items: center;
+            margin-left: auto;
+        }
+
+        .theme-switch {
+            position: relative;
+            display: inline-block;
+            width: 70px;
+            height: 34px;
+        }
+
+        .theme-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #2c3e50;
+            transition: 0.4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "🌙";
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider:before {
+            content: "☀️";
+            transform: translateX(36px);
+        }
+
+        input:checked + .slider {
+            background-color: #f39c12;
+        }
+
+        /* Projects Grid */
+        .projects-grid {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            margin-top: 40px;
+        }
+
+        /* Project Card */
+        .project-card {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(12px);
+            border-radius: 28px;
+            padding: 45px 35px;
+            width: 360px;
+            text-decoration: none;
+            color: #fff;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        body.light .project-card {
+            background: rgba(255,255,255,0.35);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.5);
+            color: #1a1a2e;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+
+        body.dark .project-card {
+            background: rgba(20,25,45,0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* Parking Card Hover Glow */
+        .project-card[data-project="parking"]:hover {
+            transform: translateY(-12px) scale(1.02);
+            box-shadow: 0 0 40px rgba(0, 200, 255, 0.5);
+            border-color: #00ccff;
+        }
+
+        /* Tournament Card Hover Glow */
+        .project-card[data-project="tournament"]:hover {
+            transform: translateY(-12px) scale(1.02);
+            box-shadow: 0 0 40px rgba(255, 200, 0, 0.5);
+            border-color: #ffcc00;
+        }
+
+        .project-icon {
+            font-size: 4.8rem;
+            margin-bottom: 20px;
+        }
+
+        .project-title {
+            font-size: 1.7rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .project-description {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            opacity: 0.85;
+        }
+
+        /* Explore Text */
+        .explore-text {
+            font-size: 1.3rem;
+            letter-spacing: 1px;
+            margin-top: 15px;
+            font-weight: 400;
+            opacity: 0.9;
+            background: linear-gradient(135deg, #fff, #ddd);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        body.light .explore-text {
+            background: linear-gradient(135deg, #2c3e50, #2980b9);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        /* PROFESSIONAL POPUP */
+        .popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(12px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .popup-content {
+            background: linear-gradient(145deg, #ffffff, #f5f7fc);
+            padding: 50px 65px;
+            border-radius: 40px;
+            text-align: center;
+            max-width: 580px;
+            animation: slideUp 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.6);
+        }
+
+        body.dark .popup-content {
+            background: linear-gradient(145deg, #1e2438, #14182c);
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .welcome-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 6px 18px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: white;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+
+        .popup-content h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #1a1a2e, #667eea);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        body.dark .popup-content h2 {
+            background: linear-gradient(135deg, #ffffff, #a0a0ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .popup-name {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #764ba2, #f093fb);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin: 15px 0;
+            letter-spacing: 1px;
+        }
+
+        .popup-desc {
+            font-size: 1rem;
+            color: #555;
+            margin-bottom: 30px;
+        }
+
+        body.dark .popup-desc {
+            color: #bbb;
+        }
+
+        .popup-close {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            padding: 14px 40px;
+            border-radius: 60px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 5px 15px rgba(102,126,234,0.3);
+        }
+
+        .popup-close:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(102,126,234,0.5);
+        }
+
+        /* Fixed Social Icons - Bottom Right */
+        .social-fixed {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 100;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(12px);
+            padding: 12px 10px;
+            border-radius: 50px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        body.light .social-fixed {
+            background: rgba(0,0,0,0.2);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.4);
+        }
+
+        .social-fixed a {
+            color: white;
+            font-size: 1.5rem;
+            transition: 0.3s;
+            display: inline-block;
+            text-align: center;
+        }
+
+        body.light .social-fixed a {
+            color: #2c3e50;
+        }
+
+        .social-fixed a:hover {
+            transform: scale(1.15);
+        }
+
+        .social-fixed a:nth-child(1):hover { color: #1877f2; }
+        .social-fixed a:nth-child(2):hover { color: #e4405f; }
+        .social-fixed a:nth-child(3):hover { color: #0a66c2; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 70px;
+            font-size: 0.8rem;
+            opacity: 0.5;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .title-left h1 { font-size: 1rem; white-space: normal; }
+            .header { flex-direction: column; align-items: center; }
+            .theme-switch-wrapper { margin-left: 0; }
+            .project-card { width: 300px; padding: 35px 25px; }
+            .popup-content { margin: 20px; padding: 35px 25px; }
+            .popup-name { font-size: 1.4rem; }
+            .explore-text { font-size: 1rem; }
+            .social-fixed { bottom: 20px; right: 20px; padding: 8px 8px; gap: 10px; }
+            .social-fixed a { font-size: 1.2rem; }
+            body.light .sun-container { top: 10px; right: 15px; }
+            body.light .sun { width: 50px; height: 50px; }
+            body.dark .moon-container { top: 10px; right: 15px; }
+            body.dark .moon { width: 45px; height: 45px; }
+        }
+    </style>
+</head>
+<body class="light">
+    <!-- Sun / Moon Elements - Right Side (No Text Labels) -->
+    <div class="sun-container">
+        <div class="sun"></div>
+    </div>
+    <div class="moon-container" style="display: none;">
+        <div class="moon"></div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <div class="title-left">
+                <h1>✨ MD. SABBIR AHMED's PROJECTS ✨</h1>
+            </div>
+            <div class="theme-switch-wrapper">
+                <label class="theme-switch">
+                    <input type="checkbox" id="themeCheckbox">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="explore-text">
+            🚀 Explore my innovative projects
+        </div>
+
+        <div class="projects-grid">
+            <a href="parking/index.html" class="project-card" data-project="parking">
+                <div class="project-icon">🚗</div>
+                <h2 class="project-title">Smart Car Parking System</h2>
+                <p class="project-description">Automated parking management with real-time slot tracking and booking system.</p>
+            </a>
+
+            <a href="tournament/index.html" class="project-card" data-project="tournament">
+                <div class="project-icon">🏆</div>
+                <h2 class="project-title">Tournament Management System</h2>
+                <p class="project-description">Complete tournament organization, match scheduling, and score tracking platform.</p>
+            </a>
+        </div>
+
+        <div class="footer">
+            <p>© 2025 MD. SABBIR AHMED | All Rights Reserved</p>
+        </div>
+    </div>
+
+    <!-- Fixed Social Icons - Bottom Right -->
+    <div class="social-fixed">
+        <a href="https://www.facebook.com/mdsabbirahmed.7510" target="_blank"><i class="fab fa-facebook-f"></i></a>
+        <a href="https://www.instagram.com/mdsabbirahmed.7510" target="_blank"><i class="fab fa-instagram"></i></a>
+        <a href="https://www.linkedin.com/in/mdsabbirahmed7510/" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+    </div>
+
+    <script>
+        // Professional Welcome Popup
+        window.addEventListener('DOMContentLoaded', function() {
+            const popup = document.createElement('div');
+            popup.className = 'popup';
+            popup.innerHTML = `
+                <div class="popup-content">
+                    <div class="welcome-badge">✨ WELCOME ✨</div>
+                    <h2>Hello, I'm</h2>
+                    <div class="popup-name">MD. SABBIR AHMED</div>
+                    <div class="popup-desc">Innovative Developer | Problem Solver | Tech Enthusiast</div>
+                    <button class="popup-close" id="closePopup">Explore My Work →</button>
+                </div>
+            `;
+            document.body.appendChild(popup);
+
+            document.getElementById('closePopup').addEventListener('click', function() {
+                popup.style.animation = 'fadeOut 0.3s';
+                setTimeout(() => popup.remove(), 300);
+            });
+
+            popup.addEventListener('click', function(e) {
+                if(e.target === popup) {
+                    popup.style.animation = 'fadeOut 0.3s';
+                    setTimeout(() => popup.remove(), 300);
+                }
+            });
+        });
+
+        // Day/Night Mode Toggle
+        const themeCheckbox = document.getElementById('themeCheckbox');
+        const body = document.body;
+        const sunContainer = document.querySelector('.sun-container');
+        const moonContainer = document.querySelector('.moon-container');
+
+        const savedTheme = localStorage.getItem('theme');
+        if(savedTheme === 'dark') {
+            body.classList.remove('light');
+            body.classList.add('dark');
+            themeCheckbox.checked = true;
+            sunContainer.style.display = 'none';
+            moonContainer.style.display = 'flex';
+        } else {
+            sunContainer.style.display = 'flex';
+            moonContainer.style.display = 'none';
+        }
+
+        themeCheckbox.addEventListener('change', function() {
+            if(this.checked) {
+                body.classList.remove('light');
+                body.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                sunContainer.style.display = 'none';
+                moonContainer.style.display = 'flex';
+            } else {
+                body.classList.remove('dark');
+                body.classList.add('light');
+                localStorage.setItem('theme', 'light');
+                sunContainer.style.display = 'flex';
+                moonContainer.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
