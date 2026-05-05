@@ -297,7 +297,7 @@
             border: 1px solid rgba(255,255,255,0.12);
         }
 
-        /* Hover effects per card type */
+        /* Hover effects per card type - enhanced with food project color */
         .project-card[data-project="parking"]:hover {
             transform: translateY(-10px) scale(1.02);
             box-shadow: 0 0 30px rgba(0, 200, 255, 0.5);
@@ -316,11 +316,17 @@
             border-color: #0099ff;
         }
 
-        /* NEW: Scientific Calculator Card Hover */
         .project-card[data-project="calculator"]:hover {
             transform: translateY(-10px) scale(1.02);
             box-shadow: 0 0 30px rgba(111, 66, 193, 0.6);
             border-color: #aa66ff;
+        }
+
+        /* NEW: Online Food Service Card Hover - vibrant food theme */
+        .project-card[data-project="foodservice"]:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 0 30px rgba(255, 99, 71, 0.6);
+            border-color: #ff6347;
         }
 
         .project-icon {
@@ -713,14 +719,22 @@
                 <p class="project-description">Complete student management system - admission, results, attendance & fee management.</p>
             </a>
 
-            <!-- NEW Scientific Calculator Card (no external link, opens modal) -->
-            <a href="calculator/index.html" class="project-card" data-project="calculator">
-    <div class="project-icon">🧮📐</div>
-    <h2 class="project-title">Scientific Calculator</h2>
-    <p class="project-description">
-        Advanced scientific calculator with trigonometry, logarithms, exponent & memory functions.
-    </p>
-</a>
+            <a href="#" class="project-card" data-project="calculator" id="scientificCalcTrigger">
+                <div class="project-icon">🧮📐</div>
+                <h2 class="project-title">Scientific Calculator</h2>
+                <p class="project-description">
+                    Advanced scientific calculator with trigonometry, logarithms, exponent & memory functions.
+                </p>
+            </a>
+
+            <!-- NEW Online Food Service Project - Connected to external GitHub page -->
+            <a href="https://mdsabbirahmed7510.github.io/Online-Food-Service/" target="_blank" rel="noopener noreferrer" class="project-card" data-project="foodservice">
+                <div class="project-icon">🍔🍕🥗</div>
+                <h2 class="project-title">Online Food Service</h2>
+                <p class="project-description">
+                    Delicious food ordering platform with dynamic menu, cart management, and seamless checkout experience.
+                </p>
+            </a>
         </div>
 
         <div class="footer">
@@ -735,8 +749,139 @@
         <a href="https://www.linkedin.com/in/mdsabbirahmed7510/" target="_blank" rel="noopener noreferrer"><i class="fab fa-linkedin-in"></i></a>
     </div>
 
+    <!-- Scientific Calculator Modal (Standalone) -->
+    <div id="calcModal" class="calc-modal">
+        <div class="calculator-panel">
+            <div class="calc-display" id="calcDisplay">0</div>
+            <div class="calc-buttons" id="calcButtonsContainer"></div>
+            <button class="calc-btn close-calc" id="closeCalcModal">Close Calculator</button>
+        </div>
+    </div>
+
     <script>
-       
+        // ========== SCIENTIFIC CALCULATOR LOGIC ==========
+        let calcExpression = '';
+        let lastResult = null;
+        let memory = 0;
+
+        function updateDisplay() {
+            const displayElem = document.getElementById('calcDisplay');
+            if (displayElem) {
+                displayElem.innerText = calcExpression || '0';
+            }
+        }
+
+        function handleCalcButton(value) {
+            switch(value) {
+                case 'AC':
+                    calcExpression = '';
+                    lastResult = null;
+                    break;
+                case 'C':
+                    calcExpression = calcExpression.slice(0, -1);
+                    break;
+                case '=':
+                    try {
+                        let expr = calcExpression.replace(/×/g, '*').replace(/÷/g, '/');
+                        expr = expr.replace(/sin\(/g, 'Math.sin(').replace(/cos\(/g, 'Math.cos(').replace(/tan\(/g, 'Math.tan(');
+                        expr = expr.replace(/log\(/g, 'Math.log10(').replace(/ln\(/g, 'Math.log(');
+                        expr = expr.replace(/√\(/g, 'Math.sqrt(');
+                        expr = expr.replace(/\^/g, '**');
+                        expr = expr.replace(/π/g, 'Math.PI');
+                        expr = expr.replace(/e/g, 'Math.E');
+                        const result = Function('"use strict";return (' + expr + ')')();
+                        if (isNaN(result) || !isFinite(result)) throw new Error('Invalid Calculation');
+                        calcExpression = result.toString();
+                        lastResult = result;
+                    } catch(e) {
+                        calcExpression = 'Error';
+                    }
+                    break;
+                case 'sin': calcExpression += 'sin('; break;
+                case 'cos': calcExpression += 'cos('; break;
+                case 'tan': calcExpression += 'tan('; break;
+                case 'log': calcExpression += 'log('; break;
+                case 'ln': calcExpression += 'ln('; break;
+                case 'sqrt': calcExpression += '√('; break;
+                case 'pi': calcExpression += 'π'; break;
+                case 'e_const': calcExpression += 'e'; break;
+                case 'pow': calcExpression += '^'; break;
+                case 'MS':
+                    memory = parseFloat(calcExpression) || 0;
+                    break;
+                case 'MR':
+                    calcExpression += memory.toString();
+                    break;
+                case 'MC':
+                    memory = 0;
+                    break;
+                case 'M+':
+                    memory += parseFloat(calcExpression) || 0;
+                    break;
+                default:
+                    calcExpression += value;
+            }
+            if (calcExpression === 'Error') {
+                setTimeout(() => { calcExpression = ''; updateDisplay(); }, 1200);
+            }
+            updateDisplay();
+        }
+
+        function buildCalculatorUI() {
+            const container = document.getElementById('calcButtonsContainer');
+            if (!container) return;
+            const buttons = [
+                'AC','C','MS','MR','MC',
+                '7','8','9','÷','sqrt',
+                '4','5','6','×','^',
+                '1','2','3','-','sin',
+                '0','.','+','=','cos',
+                'tan','log','ln','pi','e_const','M+'
+            ];
+            container.innerHTML = '';
+            buttons.forEach(btn => {
+                const btnElem = document.createElement('button');
+                btnElem.classList.add('calc-btn');
+                if (btn === '=') btnElem.classList.add('equal');
+                if (['÷','×','-','+','^'].includes(btn)) btnElem.classList.add('operator');
+                if (btn === 'AC' || btn === 'C') btnElem.classList.add('clear');
+                if (['sin','cos','tan','log','ln','sqrt','pi','e_const','MS','MR','MC','M+'].includes(btn)) btnElem.classList.add('sci');
+                let displayText = btn;
+                if (btn === '÷') displayText = '÷';
+                if (btn === '×') displayText = '×';
+                if (btn === 'sqrt') displayText = '√';
+                if (btn === 'pi') displayText = 'π';
+                if (btn === 'e_const') displayText = 'e';
+                if (btn === 'MS') displayText = 'MS';
+                if (btn === 'MR') displayText = 'MR';
+                if (btn === 'MC') displayText = 'MC';
+                if (btn === 'M+') displayText = 'M+';
+                btnElem.innerText = displayText;
+                btnElem.addEventListener('click', () => handleCalcButton(btn));
+                container.appendChild(btnElem);
+            });
+        }
+
+        // calculator modal triggers
+        const calcModal = document.getElementById('calcModal');
+        const calcTrigger = document.getElementById('scientificCalcTrigger');
+        const closeCalcBtn = document.getElementById('closeCalcModal');
+
+        if (calcTrigger) {
+            calcTrigger.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (calcModal) calcModal.classList.add('active');
+            });
+        }
+        if (closeCalcBtn) {
+            closeCalcBtn.addEventListener('click', () => {
+                if (calcModal) calcModal.classList.remove('active');
+            });
+        }
+        window.addEventListener('click', (e) => {
+            if (e.target === calcModal) calcModal.classList.remove('active');
+        });
+
         // ========== WELCOME POPUP ==========
         window.addEventListener('DOMContentLoaded', function() {
             buildCalculatorUI();
