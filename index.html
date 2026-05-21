@@ -5,945 +5,1346 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>MD. SABBIR AHMED | Smart Systems & Scientific Toolkit</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        *, *::before, *::after {
+            margin: 0; padding: 0; box-sizing: border-box;
         }
 
-        /* Base responsive and fluid setup */
-        html {
-            font-size: 16px;
-            scroll-behavior: smooth;
+        :root {
+            --bg-deep: #03020a;
+            --bg-mid: #080618;
+            --surface: rgba(255,255,255,0.04);
+            --surface-hover: rgba(255,255,255,0.08);
+            --border: rgba(255,255,255,0.08);
+            --border-glow: rgba(180,120,255,0.35);
+            --text-primary: #f0eeff;
+            --text-secondary: rgba(220,210,255,0.6);
+            --accent-violet: #8b5cf6;
+            --accent-cyan: #22d3ee;
+            --accent-rose: #f43f5e;
+            --accent-amber: #f59e0b;
+            --accent-emerald: #10b981;
+            --glow-violet: rgba(139,92,246,0.25);
+            --glow-cyan: rgba(34,211,238,0.2);
+            --card-radius: 28px;
         }
+
+        body.light {
+            --bg-deep: #eceaf7;
+            --bg-mid: #f5f3ff;
+            --surface: rgba(255,255,255,0.7);
+            --surface-hover: rgba(255,255,255,0.9);
+            --border: rgba(139,92,246,0.15);
+            --border-glow: rgba(139,92,246,0.4);
+            --text-primary: #1a0a3c;
+            --text-secondary: rgba(60,30,100,0.6);
+            --glow-violet: rgba(139,92,246,0.15);
+            --glow-cyan: rgba(34,211,238,0.12);
+        }
+
+        html { scroll-behavior: smooth; font-size: 16px; }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: background 0.5s, color 0.4s;
+            cursor: none;
+        }
+
+        /* ── Custom Cursor ── */
+        .cursor-dot {
+            width: 8px; height: 8px;
+            background: var(--accent-violet);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 99999;
+            transition: transform 0.1s, background 0.3s;
+            transform: translate(-50%, -50%);
+        }
+        .cursor-ring {
+            width: 36px; height: 36px;
+            border: 1.5px solid var(--accent-violet);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 99998;
+            opacity: 0.5;
+            transition: transform 0.15s ease, width 0.2s, height 0.2s, opacity 0.2s;
+            transform: translate(-50%, -50%);
+        }
+        .cursor-ring.expand { width: 56px; height: 56px; opacity: 0.25; border-color: var(--accent-cyan); }
+
+        /* ── Canvas BG ── */
+        #bgCanvas {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* ── Grid Overlay ── */
+        .grid-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(139,92,246,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(139,92,246,0.04) 1px, transparent 1px);
+            background-size: 60px 60px;
+            transition: opacity 0.4s;
+        }
+        body.light .grid-overlay { opacity: 0.5; }
+
+        /* ── Layout ── */
+        .page-wrap {
+            position: relative;
+            z-index: 10;
             min-height: 100vh;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 1.25rem;
-            position: relative;
-            overflow-x: hidden;
-            transition: background 0.4s ease, color 0.3s ease;
-        }
-
-        /* ========== LIGHT MODE ========== */
-        body.light {
-            background: linear-gradient(135deg, #f5a623, #f7d794, #ffeaa7);
-            color: #1a1a2e;
-        }
-
-        body.light .sun-container {
-            position: fixed;
-            top: 1.25rem;
-            right: 1.5rem;
-            display: flex;
             flex-direction: column;
             align-items: center;
-            z-index: 15;
+            padding: 0 1.5rem 5rem;
         }
 
-        body.light .sun {
-            width: clamp(3rem, 8vw, 4.5rem);
-            height: clamp(3rem, 8vw, 4.5rem);
-            background: radial-gradient(circle, #fff9c4, #ffeb3b, #ff9800);
-            border-radius: 50%;
-            box-shadow: 0 0 30px rgba(255, 235, 59, 0.7);
-            animation: sunGlow 2s infinite alternate;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        body.light .sun:hover { transform: scale(1.05); }
-
-        @keyframes sunGlow {
-            0% { box-shadow: 0 0 20px rgba(255, 235, 59, 0.5); }
-            100% { box-shadow: 0 0 50px rgba(255, 235, 59, 0.9); }
-        }
-
-        body.light::before {
-            content: '';
-            position: fixed;
-            top: -3rem;
-            right: -3rem;
-            width: 250px;
-            height: 250px;
-            background: radial-gradient(ellipse, rgba(255,235,59,0.35), transparent 70%);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        /* ========== DARK MODE ========== */
-        body.dark {
-            background: linear-gradient(135deg, #0b1120, #1a1a3e, #0f172a);
-            color: #e0e0e0;
-        }
-
-        body.dark .moon-container {
-            position: fixed;
-            top: 1.25rem;
-            right: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            z-index: 15;
-        }
-
-        body.dark .moon {
-            width: clamp(2.8rem, 7vw, 4rem);
-            height: clamp(2.8rem, 7vw, 4rem);
-            background: radial-gradient(circle, #f5f5dc, #e0e0c0, #c0c0a0);
-            border-radius: 50%;
-            box-shadow: 0 0 20px rgba(220, 220, 200, 0.5);
-            animation: moonGlow 2s infinite alternate;
-            cursor: pointer;
-            position: relative;
-        }
-        body.dark .moon:hover { transform: scale(1.03); }
-
-        body.dark .moon::before {
-            content: '';
-            position: absolute;
-            top: 15%;
-            left: 20%;
-            width: 18%;
-            height: 18%;
-            background: rgba(100, 100, 80, 0.5);
-            border-radius: 50%;
-        }
-        body.dark .moon::after {
-            content: '';
-            position: absolute;
-            bottom: 20%;
-            right: 22%;
-            width: 14%;
-            height: 14%;
-            background: rgba(100, 100, 80, 0.5);
-            border-radius: 50%;
-        }
-
-        @keyframes moonGlow {
-            0% { box-shadow: 0 0 15px rgba(220, 220, 200, 0.4); }
-            100% { box-shadow: 0 0 35px rgba(220, 220, 200, 0.7); }
-        }
-
-        body.dark::before {
-            content: '';
-            position: fixed;
-            top: -2rem;
-            right: -2rem;
-            width: 230px;
-            height: 230px;
-            background: radial-gradient(ellipse, rgba(200,200,180,0.18), transparent 70%);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        /* Main container fluid */
-        .container {
-            max-width: 1400px;
+        /* ── Top Bar ── */
+        .topbar {
             width: 100%;
-            margin: 0 auto;
-            text-align: center;
-            position: relative;
-            z-index: 5;
-            padding: 0.5rem 0 1rem;
-        }
-
-        /* Header Section - fully responsive */
-        .header {
+            max-width: 1300px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin-bottom: 2.5rem;
-            padding: 0 0.5rem;
+            padding: 1.8rem 0;
+            border-bottom: 1px solid var(--border);
         }
 
-        .title-left h1 {
-            font-size: clamp(1rem, 5vw, 1.6rem);
-            font-weight: 700;
-            letter-spacing: 1px;
-            background: linear-gradient(135deg, #fff, #f5b042, #ff6a88);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            text-shadow: 1px 1px 4px rgba(0,0,0,0.1);
-            white-space: nowrap;
-        }
-
-        body.light .title-left h1 {
-            background: linear-gradient(135deg, #2c3e50, #e67e22, #d35400);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        /* Theme Toggle Switch - responsive */
-        .theme-switch-wrapper {
+        .logo-mark {
             display: flex;
             align-items: center;
+            gap: 0.85rem;
         }
-
-        .theme-switch {
-            position: relative;
-            display: inline-block;
-            width: 70px;
-            height: 34px;
-        }
-
-        .theme-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #2c3e50;
-            transition: 0.3s;
-            border-radius: 34px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "🌙";
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            height: 26px;
-            width: 26px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: 0.3s;
-            border-radius: 50%;
-        }
-
-        input:checked + .slider:before {
-            content: "☀️";
-            transform: translateX(36px);
-        }
-
-        input:checked + .slider {
-            background-color: #f39c12;
-        }
-
-        /* Explore Text */
-        .explore-text {
-            font-size: clamp(1rem, 4vw, 1.4rem);
-            letter-spacing: 1px;
-            font-weight: 500;
-            opacity: 0.9;
-            background: linear-gradient(135deg, #fff, #ddd);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            margin: 1rem 0 1.5rem;
-        }
-
-        body.light .explore-text {
-            background: linear-gradient(135deg, #2c3e50, #2980b9);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        /* Projects Grid - fully responsive with flex wrap */
-        .projects-grid {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            flex-wrap: wrap;
-            margin: 2.5rem 0 1rem;
-        }
-
-        /* Project Cards - mobile first with clamp */
-        .project-card {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(12px);
-            border-radius: 2rem;
-            padding: 2rem 1.5rem;
-            width: min(100%, 340px);
-            text-decoration: none;
-            text-align: center;
-            transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-            border: 1px solid rgba(255,255,255,0.25);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-        }
-
-        body.light .project-card {
-            background: rgba(255,255,255,0.5);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255,255,255,0.7);
-            color: #1a1a2e;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-        }
-
-        body.dark .project-card {
-            background: rgba(20,25,45,0.8);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255,255,255,0.12);
-        }
-
-        /* Hover effects per card type - enhanced with food project color */
-        .project-card[data-project="parking"]:hover {
-            transform: translateY(-10px) scale(1.02);
-            box-shadow: 0 0 30px rgba(0, 200, 255, 0.5);
-            border-color: #00ccff;
-        }
-
-        .project-card[data-project="tournament"]:hover {
-            transform: translateY(-10px) scale(1.02);
-            box-shadow: 0 0 30px rgba(255, 200, 0, 0.5);
-            border-color: #ffcc00;
-        }
-
-        .project-card[data-project="student"]:hover {
-            transform: translateY(-10px) scale(1.02);
-            box-shadow: 0 0 30px rgba(0, 150, 255, 0.5);
-            border-color: #0099ff;
-        }
-
-        .project-card[data-project="calculator"]:hover {
-            transform: translateY(-10px) scale(1.02);
-            box-shadow: 0 0 30px rgba(111, 66, 193, 0.6);
-            border-color: #aa66ff;
-        }
-
-        /* NEW: Online Food Service Card Hover - vibrant food theme */
-        .project-card[data-project="foodservice"]:hover {
-            transform: translateY(-10px) scale(1.02);
-            box-shadow: 0 0 30px rgba(255, 99, 71, 0.6);
-            border-color: #ff6347;
-        }
-
-        .project-icon {
-            font-size: clamp(3rem, 10vw, 4.8rem);
-            margin-bottom: 1rem;
-        }
-
-        .project-title {
-            font-size: clamp(1.2rem, 5vw, 1.8rem);
-            font-weight: 700;
-            margin-bottom: 0.8rem;
-        }
-
-        .project-description {
-            font-size: 0.9rem;
-            line-height: 1.45;
-            opacity: 0.85;
-        }
-
-        /* Footer */
-        .footer {
-            margin-top: 4rem;
-            font-size: 0.75rem;
-            opacity: 0.6;
-            padding-bottom: 1rem;
-        }
-
-        /* ========== PROFESSIONAL POPUP (fully responsive) ========== */
-        .popup {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(14px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-            animation: fadeIn 0.4s ease;
-            padding: 1rem;
-        }
-
-        .popup-content {
-            background: linear-gradient(145deg, #ffffff, #f5f7fc);
-            padding: clamp(2rem, 6vw, 3.5rem) clamp(1.5rem, 6vw, 3rem);
-            border-radius: 2.5rem;
-            text-align: center;
-            max-width: 550px;
-            width: 100%;
-            animation: slideUp 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-            box-shadow: 0 30px 50px rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.5);
-        }
-
-        body.dark .popup-content {
-            background: linear-gradient(145deg, #1e2438, #14182c);
-            border: 1px solid rgba(255,255,255,0.15);
-        }
-
-        .welcome-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            padding: 0.4rem 1.2rem;
-            border-radius: 60px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: white;
-            letter-spacing: 1px;
-            margin-bottom: 1.2rem;
-        }
-
-        .popup-content h2 {
-            font-size: clamp(1.4rem, 5vw, 2rem);
-            margin-bottom: 0.4rem;
-            background: linear-gradient(135deg, #1a1a2e, #667eea);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        body.dark .popup-content h2 {
-            background: linear-gradient(135deg, #ffffff, #a0a0ff);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .popup-name {
-            font-size: clamp(1.3rem, 6vw, 2rem);
+        .logo-hex {
+            width: 44px; height: 44px;
+            background: linear-gradient(135deg, var(--accent-violet), var(--accent-cyan));
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Syne', sans-serif;
             font-weight: 800;
-            background: linear-gradient(135deg, #764ba2, #f093fb);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            margin: 1rem 0;
+            font-size: 0.95rem;
+            color: #fff;
+            flex-shrink: 0;
+            animation: hexPulse 3s ease-in-out infinite;
         }
-
-        .popup-desc {
-            font-size: clamp(0.85rem, 3.5vw, 1rem);
-            color: #555;
-            margin-bottom: 2rem;
+        @keyframes hexPulse {
+            0%,100% { box-shadow: 0 0 0 0 rgba(139,92,246,0); }
+            50% { box-shadow: 0 0 0 10px rgba(139,92,246,0.1); }
         }
-
-        body.dark .popup-desc {
-            color: #bbb;
-        }
-
-        .popup-close {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border: none;
-            padding: 0.8rem 1.8rem;
-            border-radius: 60px;
-            color: white;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.25s;
-            box-shadow: 0 5px 15px rgba(102,126,234,0.3);
-            width: auto;
-        }
-
-        .popup-close:hover {
-            transform: scale(1.03);
-            box-shadow: 0 10px 25px rgba(102,126,234,0.5);
-        }
-
-        /* Fixed Social Icons - bottom right responsive */
-        .social-fixed {
-            position: fixed;
-            bottom: 1.5rem;
-            right: 1.5rem;
+        .logo-text {
             display: flex;
             flex-direction: column;
-            gap: 0.8rem;
-            z-index: 100;
-            background: rgba(255,255,255,0.2);
-            backdrop-filter: blur(12px);
-            padding: 0.7rem 0.6rem;
-            border-radius: 3rem;
-            border: 1px solid rgba(255,255,255,0.3);
-            transition: 0.2s;
+        }
+        .logo-name {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: clamp(0.85rem, 2.5vw, 1.05rem);
+            letter-spacing: 1px;
+            background: linear-gradient(90deg, var(--text-primary), var(--accent-violet));
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+        }
+        .logo-role {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+            letter-spacing: 2px;
+            text-transform: uppercase;
         }
 
-        body.light .social-fixed {
-            background: rgba(0,0,0,0.2);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255,255,255,0.5);
-        }
-
-        .social-fixed a {
-            color: white;
-            font-size: 1.4rem;
-            transition: 0.2s;
-            display: inline-flex;
-            justify-content: center;
+        /* ── Theme Toggle ── */
+        .theme-toggle {
+            display: flex;
             align-items: center;
+            gap: 0.6rem;
+        }
+        .toggle-track {
+            width: 56px; height: 28px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            cursor: pointer;
+            position: relative;
+            transition: background 0.3s, border 0.3s;
+        }
+        .toggle-track:hover { border-color: var(--accent-violet); }
+        .toggle-track input { display: none; }
+        .toggle-thumb {
+            position: absolute;
+            top: 4px; left: 4px;
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-violet), var(--accent-cyan));
+            transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px;
+        }
+        .toggle-track.active .toggle-thumb { transform: translateX(28px); }
+        .toggle-label {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            min-width: 36px;
         }
 
-        body.light .social-fixed a {
-            color: #2c3e50;
+        /* ── Hero ── */
+        .hero {
+            width: 100%;
+            max-width: 1300px;
+            padding: 5rem 0 3rem;
+            text-align: center;
+            position: relative;
         }
 
-        .social-fixed a:hover {
-            transform: scale(1.2);
+        .hero-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 1.1rem;
+            border-radius: 100px;
+            border: 1px solid var(--border-glow);
+            background: var(--glow-violet);
+            font-family: 'DM Mono', monospace;
+            font-size: 0.72rem;
+            color: var(--accent-violet);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 1.8rem;
+            animation: fadeSlideDown 0.8s ease both;
         }
-        .social-fixed a:nth-child(1):hover { color: #1877f2; }
-        .social-fixed a:nth-child(2):hover { color: #e4405f; }
-        .social-fixed a:nth-child(3):hover { color: #0a66c2; }
+        .hero-eyebrow::before {
+            content: '';
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--accent-violet);
+            animation: blink 1.5s ease-in-out infinite;
+        }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        .hero-title {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: clamp(2.2rem, 7vw, 5rem);
+            line-height: 1.05;
+            letter-spacing: -1px;
+            margin-bottom: 1.5rem;
+            animation: fadeSlideDown 0.9s 0.1s ease both;
         }
-        @keyframes fadeOut {
-            from { opacity: 1; }
-            to { opacity: 0; }
+        .hero-title .line1 {
+            display: block;
+            background: linear-gradient(135deg, var(--text-primary) 30%, rgba(220,210,255,0.5));
+            -webkit-background-clip: text; background-clip: text; color: transparent;
         }
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(40px); }
+        .hero-title .line2 {
+            display: block;
+            background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan), var(--accent-rose));
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+        }
+
+        .hero-sub {
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            color: var(--text-secondary);
+            max-width: 520px;
+            margin: 0 auto 2.5rem;
+            line-height: 1.7;
+            animation: fadeSlideDown 1s 0.2s ease both;
+        }
+
+        .hero-badges {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin-bottom: 1rem;
+            animation: fadeSlideDown 1s 0.3s ease both;
+        }
+        .badge {
+            padding: 0.35rem 0.9rem;
+            border-radius: 100px;
+            font-family: 'DM Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+            border: 1px solid;
+        }
+        .badge-v { border-color: var(--accent-violet); color: var(--accent-violet); background: rgba(139,92,246,0.08); }
+        .badge-c { border-color: var(--accent-cyan); color: var(--accent-cyan); background: rgba(34,211,238,0.08); }
+        .badge-e { border-color: var(--accent-emerald); color: var(--accent-emerald); background: rgba(16,185,129,0.08); }
+
+        /* ── 3D Scene Container ── */
+        .scene {
+            perspective: 1200px;
+            perspective-origin: 50% 40%;
+            width: 100%;
+            max-width: 1300px;
+            margin: 2rem 0;
+        }
+
+        /* ── Projects Grid ── */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.4rem;
+            transform: rotateX(2deg);
+            transform-style: preserve-3d;
+            transition: transform 0.6s ease;
+        }
+        .projects-grid:hover { transform: rotateX(0deg); }
+
+        @media (max-width: 900px) {
+            .projects-grid { grid-template-columns: repeat(2, 1fr); transform: none !important; }
+        }
+        @media (max-width: 560px) {
+            .projects-grid { grid-template-columns: 1fr; transform: none !important; }
+        }
+
+        /* Featured card spans 2 cols on large */
+        .card-featured {
+            grid-column: span 2;
+        }
+        @media (max-width: 900px) { .card-featured { grid-column: span 1; } }
+
+        /* ── Project Card ── */
+        .project-card {
+            position: relative;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--card-radius);
+            padding: 2rem 1.8rem;
+            text-decoration: none;
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            overflow: hidden;
+            transform-style: preserve-3d;
+            transition: transform 0.4s cubic-bezier(0.2,0.9,0.4,1.1), border-color 0.3s, box-shadow 0.4s;
+            cursor: none;
+            min-height: 240px;
+        }
+
+        /* Shine overlay */
+        .project-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 80% 60% at var(--mx,50%) var(--my,30%), rgba(255,255,255,0.07), transparent 70%);
+            border-radius: inherit;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .project-card:hover::before { opacity: 1; }
+
+        /* Glow border bottom */
+        .project-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 10%; right: 10%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--card-glow, rgba(139,92,246,0.8)), transparent);
+            transform: scaleX(0);
+            transition: transform 0.4s;
+        }
+        .project-card:hover::after { transform: scaleX(1); }
+
+        .project-card:hover {
+            transform: translateY(-10px) rotateX(3deg) rotateY(-1deg);
+            border-color: var(--card-glow-border, rgba(139,92,246,0.5));
+            box-shadow: 0 30px 60px rgba(0,0,0,0.3), 0 0 40px var(--card-shadow, rgba(139,92,246,0.15));
+        }
+        body.light .project-card:hover {
+            box-shadow: 0 20px 50px rgba(100,60,200,0.12), 0 0 30px var(--card-shadow, rgba(139,92,246,0.1));
+        }
+
+        /* Card color themes */
+        .card-parking {
+            --card-glow: rgba(34,211,238,0.9);
+            --card-glow-border: rgba(34,211,238,0.5);
+            --card-shadow: rgba(34,211,238,0.15);
+            --card-accent: var(--accent-cyan);
+        }
+        .card-tournament {
+            --card-glow: rgba(245,158,11,0.9);
+            --card-glow-border: rgba(245,158,11,0.5);
+            --card-shadow: rgba(245,158,11,0.15);
+            --card-accent: var(--accent-amber);
+        }
+        .card-student {
+            --card-glow: rgba(139,92,246,0.9);
+            --card-glow-border: rgba(139,92,246,0.5);
+            --card-shadow: rgba(139,92,246,0.15);
+            --card-accent: var(--accent-violet);
+        }
+        .card-calculator {
+            --card-glow: rgba(244,63,94,0.9);
+            --card-glow-border: rgba(244,63,94,0.5);
+            --card-shadow: rgba(244,63,94,0.15);
+            --card-accent: var(--accent-rose);
+        }
+        .card-food {
+            --card-glow: rgba(16,185,129,0.9);
+            --card-glow-border: rgba(16,185,129,0.5);
+            --card-shadow: rgba(16,185,129,0.15);
+            --card-accent: var(--accent-emerald);
+        }
+
+        /* Card corner number */
+        .card-num {
+            position: absolute;
+            top: 1.2rem; right: 1.5rem;
+            font-family: 'DM Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+            letter-spacing: 1px;
+            opacity: 0.5;
+        }
+
+        /* Card icon wrap */
+        .card-icon-wrap {
+            position: relative;
+            width: fit-content;
+        }
+        .card-icon-bg {
+            width: 64px; height: 64px;
+            border-radius: 18px;
+            background: var(--surface-hover);
+            border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2rem;
+            transition: border-color 0.3s, transform 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .card-icon-bg::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 30% 30%, var(--card-accent), transparent 70%);
+            opacity: 0.1;
+            transition: opacity 0.3s;
+        }
+        .project-card:hover .card-icon-bg {
+            border-color: var(--card-glow-border);
+            transform: translateZ(20px) scale(1.05);
+        }
+        .project-card:hover .card-icon-bg::before { opacity: 0.25; }
+
+        /* Featured card bigger icon */
+        .card-featured .card-icon-bg {
+            width: 76px; height: 76px;
+            border-radius: 22px;
+            font-size: 2.4rem;
+        }
+
+        /* Tag pill */
+        .card-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.25rem 0.7rem;
+            border-radius: 100px;
+            font-family: 'DM Mono', monospace;
+            font-size: 0.6rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            background: var(--surface-hover);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            width: fit-content;
+        }
+        .card-tag::before {
+            content: '';
+            width: 5px; height: 5px;
+            border-radius: 50%;
+            background: var(--card-accent);
+        }
+
+        .card-body { flex: 1; }
+        .card-title {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: clamp(1rem, 2.5vw, 1.25rem);
+            margin-bottom: 0.5rem;
+            transition: color 0.3s;
+        }
+        .project-card:hover .card-title { color: var(--card-accent); }
+        .card-desc {
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
+        .card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 0.8rem;
+            border-top: 1px solid var(--border);
+            margin-top: auto;
+        }
+        .card-cta {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-family: 'DM Mono', monospace;
+            font-size: 0.72rem;
+            color: var(--card-accent);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            opacity: 0;
+            transform: translateX(-6px);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        .project-card:hover .card-cta { opacity: 1; transform: translateX(0); }
+        .card-cta-arrow {
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            border: 1px solid var(--card-accent);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px;
+        }
+
+        /* Corner glow decoration */
+        .card-glow-corner {
+            position: absolute;
+            top: -40px; right: -40px;
+            width: 120px; height: 120px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--card-accent), transparent 70%);
+            opacity: 0.07;
+            transition: opacity 0.4s;
+            pointer-events: none;
+        }
+        .project-card:hover .card-glow-corner { opacity: 0.18; }
+
+        /* Featured layout override */
+        .card-featured .card-body-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+        .card-featured .card-desc { max-width: 340px; }
+
+        /* ── Stats Strip ── */
+        .stats-strip {
+            width: 100%;
+            max-width: 1300px;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin: 1.4rem 0 0;
+        }
+        .stat-item {
+            flex: 1;
+            min-width: 140px;
+            padding: 1.2rem 1.5rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: border-color 0.3s;
+        }
+        .stat-item:hover { border-color: var(--border-glow); }
+        .stat-icon {
+            font-size: 1.5rem;
+            width: 44px; height: 44px;
+            border-radius: 12px;
+            background: var(--surface-hover);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .stat-val {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--text-primary), var(--accent-violet));
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+        }
+        .stat-label {
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.5px;
+        }
+
+        /* ── Footer ── */
+        .site-footer {
+            width: 100%;
+            max-width: 1300px;
+            margin-top: 5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .footer-copy {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            letter-spacing: 1px;
+        }
+        .footer-dot { color: var(--accent-violet); margin: 0 0.3rem; }
+
+        /* ── Social Dock ── */
+        .social-dock {
+            position: fixed;
+            left: 1.5rem;
+            bottom: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.2rem;
+            z-index: 100;
+        }
+        .social-dock::after {
+            content: '';
+            width: 1px;
+            height: 60px;
+            background: linear-gradient(to bottom, var(--border-glow), transparent);
+            margin-top: 0.6rem;
+        }
+        .social-link {
+            width: 38px; height: 38px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: all 0.25s;
+            backdrop-filter: blur(12px);
+        }
+        .social-link:hover { color: #fff; transform: scale(1.1) translateX(4px); }
+        .social-link:nth-child(1):hover { background: #1877f2; border-color: #1877f2; }
+        .social-link:nth-child(2):hover { background: linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366); border-color: #e4405f; }
+        .social-link:nth-child(3):hover { background: #0a66c2; border-color: #0a66c2; }
+
+        @media (max-width: 560px) {
+            .social-dock { display: none; }
+        }
+
+        /* ── Scroll indicator ── */
+        .scroll-hint {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.4rem;
+            position: absolute;
+            bottom: -2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: fadeSlideDown 1s 0.5s ease both;
+        }
+        .scroll-hint span {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.6rem;
+            color: var(--text-secondary);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .scroll-line {
+            width: 1px;
+            height: 36px;
+            background: linear-gradient(to bottom, var(--accent-violet), transparent);
+            animation: scrollAnim 2s ease-in-out infinite;
+        }
+        @keyframes scrollAnim {
+            0%,100% { transform: scaleY(1); opacity: 1; }
+            50% { transform: scaleY(0.5); opacity: 0.4; }
+        }
+
+        /* ── Animations ── */
+        @keyframes fadeSlideDown {
+            from { opacity: 0; transform: translateY(-18px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
-        /* Extra small devices (below 480px) fine-tune */
-        @media (max-width: 550px) {
-            body {
-                padding: 0.8rem;
-            }
-            .header {
-                flex-direction: column;
-                align-items: center;
-                gap: 0.7rem;
-            }
-            .title-left h1 {
-                white-space: normal;
-                text-align: center;
-                font-size: 1rem;
-                line-height: 1.3;
-            }
-            .theme-switch-wrapper {
-                margin-left: 0;
-            }
-            .project-card {
-                width: 100%;
-                max-width: 300px;
-                padding: 1.5rem 1.2rem;
-            }
-            .social-fixed {
-                bottom: 1rem;
-                right: 0.8rem;
-                padding: 0.5rem 0.5rem;
-                gap: 0.6rem;
-            }
-            .social-fixed a {
-                font-size: 1.2rem;
-            }
-            .explore-text {
-                font-size: 0.95rem;
-            }
-            .footer {
-                margin-top: 2rem;
-            }
-            body.light .sun-container,
-            body.dark .moon-container {
-                top: 0.7rem;
-                right: 0.8rem;
-            }
-            .popup-content {
-                padding: 1.8rem 1.2rem;
-            }
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(22px); }
+            to { opacity: 1; transform: translateY(0); }
         }
+        @keyframes fadeIn { from{opacity:0} to{opacity:1} }
 
-        /* Medium devices (tablet) */
-        @media (min-width: 768px) and (max-width: 1024px) {
-            .project-card {
-                width: 320px;
-            }
-            .container {
-                padding: 0 1rem;
-            }
+        .cards-animate .project-card {
+            opacity: 0;
+            animation: fadeSlideUp 0.6s ease forwards;
         }
+        .cards-animate .project-card:nth-child(1) { animation-delay: 0.05s; }
+        .cards-animate .project-card:nth-child(2) { animation-delay: 0.15s; }
+        .cards-animate .project-card:nth-child(3) { animation-delay: 0.25s; }
+        .cards-animate .project-card:nth-child(4) { animation-delay: 0.35s; }
+        .cards-animate .project-card:nth-child(5) { animation-delay: 0.45s; }
 
-        /* large screens: keep card max width */
-        @media (min-width: 1200px) {
-            .project-card {
-                width: 380px;
-                padding: 2.5rem 2rem;
-            }
-            .projects-grid {
-                gap: 3rem;
-            }
+        /* ── Popup ── */
+        .popup {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(20px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9000;
+            padding: 1rem;
+            animation: fadeIn 0.4s ease;
         }
+        .popup-inner {
+            background: var(--surface);
+            border: 1px solid var(--border-glow);
+            border-radius: 2.5rem;
+            padding: clamp(2rem,6vw,3.5rem) clamp(1.5rem,5vw,3rem);
+            max-width: 500px; width: 100%;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            animation: popupIn 0.5s cubic-bezier(0.2,0.9,0.4,1.1) both;
+        }
+        body.light .popup-inner {
+            background: rgba(245,243,255,0.97);
+        }
+        @keyframes popupIn {
+            from { opacity:0; transform: scale(0.88) translateY(30px); }
+            to   { opacity:1; transform: scale(1) translateY(0); }
+        }
+        .popup-glow {
+            position: absolute;
+            width: 260px; height: 260px;
+            top: -80px; left: 50%;
+            transform: translateX(-50%);
+            background: radial-gradient(circle, var(--accent-violet), transparent 70%);
+            opacity: 0.12;
+            pointer-events: none;
+        }
+        .popup-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.35rem 1rem;
+            border-radius: 100px;
+            border: 1px solid var(--border-glow);
+            background: var(--glow-violet);
+            font-family: 'DM Mono', monospace;
+            font-size: 0.68rem;
+            color: var(--accent-violet);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+        }
+        .popup-heading {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(0.95rem, 3vw, 1.1rem);
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+        .popup-name {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: clamp(1.6rem, 6vw, 2.4rem);
+            background: linear-gradient(135deg, var(--accent-violet), var(--accent-cyan), var(--accent-rose));
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+            margin-bottom: 1rem;
+        }
+        .popup-desc {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 2rem;
+        }
+        .popup-roles {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+        .popup-role {
+            padding: 0.3rem 0.85rem;
+            border-radius: 100px;
+            font-family: 'DM Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 1px;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+        .popup-btn {
+            background: linear-gradient(135deg, var(--accent-violet), #6d28d9);
+            border: none;
+            padding: 0.9rem 2.2rem;
+            border-radius: 100px;
+            color: white;
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.25s;
+            box-shadow: 0 10px 30px rgba(139,92,246,0.3);
+            letter-spacing: 0.5px;
+        }
+        .popup-btn:hover { transform: scale(1.04); box-shadow: 0 14px 40px rgba(139,92,246,0.5); }
 
-        /* Scientific Calculator Modal Styles - Embedded Elegant Design */
+        /* ── Calc Modal ── */
         .calc-modal {
             display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(10px);
-            z-index: 3000;
-            justify-content: center;
-            align-items: center;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(14px);
+            z-index: 8000;
+            justify-content: center; align-items: center;
             padding: 1rem;
         }
-        .calc-modal.active {
-            display: flex;
-            animation: fadeIn 0.3s ease;
-        }
-        .calculator-panel {
-            background: rgba(20, 25, 45, 0.95);
-            backdrop-filter: blur(20px);
+        .calc-modal.active { display: flex; animation: fadeIn 0.3s ease; }
+        .calc-panel {
+            background: linear-gradient(160deg, #0f0d1e, #1a1535);
+            border: 1px solid rgba(139,92,246,0.3);
             border-radius: 2.5rem;
-            max-width: 520px;
-            width: 100%;
-            padding: 1.5rem;
-            border: 1px solid rgba(255,255,255,0.2);
-            box-shadow: 0 25px 45px rgba(0,0,0,0.4);
-            transition: 0.2s;
+            padding: 1.8rem;
+            max-width: 480px; width: 100%;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.5), 0 0 60px rgba(139,92,246,0.1);
+            animation: popupIn 0.4s ease;
         }
-        body.light .calculator-panel {
-            background: rgba(245, 245, 255, 0.96);
-            border: 1px solid rgba(0,0,0,0.1);
+        body.light .calc-panel {
+            background: linear-gradient(160deg, #faf8ff, #f0ecff);
+            border-color: rgba(139,92,246,0.25);
         }
+        .calc-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 1.2rem;
+        }
+        .calc-title-bar {
+            display: flex; align-items: center; gap: 0.6rem;
+            font-family: 'Syne', sans-serif; font-weight: 700;
+            font-size: 0.9rem; color: var(--text-primary);
+        }
+        .calc-title-bar span { font-size: 1.1rem; }
+        .calc-close-btn {
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            background: rgba(244,63,94,0.15);
+            border: 1px solid rgba(244,63,94,0.3);
+            color: var(--accent-rose);
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s;
+        }
+        .calc-close-btn:hover { background: var(--accent-rose); color: white; }
         .calc-display {
-            background: rgba(0,0,0,0.6);
-            padding: 1rem;
-            border-radius: 2rem;
-            margin-bottom: 1.5rem;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(139,92,246,0.2);
+            border-radius: 1.5rem;
+            padding: 1.2rem 1.5rem;
             text-align: right;
+            font-family: 'DM Mono', monospace;
             font-size: 2rem;
-            font-weight: 500;
-            font-family: monospace;
+            font-weight: 400;
+            color: #e0d8ff;
+            min-height: 80px;
+            margin-bottom: 1.2rem;
             word-break: break-all;
-            min-height: 85px;
-            color: #fff;
         }
         body.light .calc-display {
-            background: #e9ecef;
-            color: #1e1e2a;
+            background: rgba(139,92,246,0.06);
+            color: #2a1060;
+            border-color: rgba(139,92,246,0.15);
         }
         .calc-buttons {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 0.7rem;
+            gap: 0.6rem;
         }
         .calc-btn {
-            background: rgba(255,255,255,0.15);
-            border: none;
-            border-radius: 1.5rem;
-            padding: 1rem 0;
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: white;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px;
+            padding: 0.85rem 0.4rem;
+            font-family: 'DM Mono', monospace;
+            font-size: 1rem; font-weight: 500;
+            color: #c0b8e8;
             cursor: pointer;
-            transition: 0.1s linear;
-            font-family: monospace;
+            transition: all 0.12s;
         }
-        body.light .calc-btn {
-            background: #f0f0f5;
-            color: #1e1e2a;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
+        body.light .calc-btn { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.08); color: #3a2070; }
+        .calc-btn:hover { background: rgba(139,92,246,0.2); border-color: rgba(139,92,246,0.4); color: white; transform: scale(1.04); }
+        body.light .calc-btn:hover { color: var(--accent-violet); }
         .calc-btn:active { transform: scale(0.96); }
-        .calc-btn.operator { background: #ff9f43; color: white; }
-        .calc-btn.equal { background: #10ac84; color: white; grid-column: span 2; }
-        .calc-btn.clear { background: #ee5253; color: white; }
-        .calc-btn.sci { background: #5f27cd; color: white; font-size: 0.9rem; }
-        .close-calc {
-            background: #576574;
-            margin-top: 1rem;
-            width: 100%;
-            border-radius: 2rem;
-            padding: 0.7rem;
-            font-size: 1rem;
-        }
-        @media (max-width: 550px) {
-            .calc-buttons { gap: 0.5rem; }
-            .calc-btn { padding: 0.7rem 0; font-size: 1rem; }
+        .calc-btn.op { background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.3); color: #fbbf24; }
+        .calc-btn.op:hover { background: rgba(245,158,11,0.3); }
+        .calc-btn.eq { background: linear-gradient(135deg, var(--accent-violet), #6d28d9); border-color: transparent; color: white; grid-column: span 2; }
+        .calc-btn.eq:hover { box-shadow: 0 6px 20px rgba(139,92,246,0.4); }
+        .calc-btn.clr { background: rgba(244,63,94,0.15); border-color: rgba(244,63,94,0.3); color: #fb7185; }
+        .calc-btn.clr:hover { background: rgba(244,63,94,0.3); }
+        .calc-btn.sci { background: rgba(139,92,246,0.1); border-color: rgba(139,92,246,0.25); color: #a78bfa; font-size: 0.78rem; }
+        .calc-btn.sci:hover { background: rgba(139,92,246,0.25); }
+        @media (max-width:500px) {
+            .calc-buttons { gap: 0.4rem; }
+            .calc-btn { padding: 0.65rem 0.3rem; font-size: 0.85rem; }
             .calc-display { font-size: 1.5rem; }
+        }
+
+        /* ── Responsiveness extras ── */
+        @media (max-width: 560px) {
+            .topbar { flex-direction: column; gap: 1rem; }
+            .hero { padding: 3rem 0 2rem; }
+            .stats-strip { display: none; }
+        }
+        @media (max-width: 768px) {
+            .card-featured .card-body-row { flex-direction: column; gap: 1rem; }
         }
     </style>
 </head>
-<body class="light">
-    <div class="sun-container">
-        <div class="sun" aria-label="Switch to dark mode (moon)"></div>
-    </div>
-    <div class="moon-container" style="display: none;">
-        <div class="moon" aria-label="Switch to light mode (sun)"></div>
-    </div>
+<body class="dark">
 
-    <div class="container">
-        <div class="header">
-            <div class="title-left">
-                <h1>✨ MD. SABBIR AHMED's PROJECTS ✨</h1>
+<!-- Custom Cursor -->
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- BG Particles Canvas -->
+<canvas id="bgCanvas"></canvas>
+<div class="grid-overlay"></div>
+
+<!-- Social Dock -->
+<div class="social-dock">
+    <a href="https://www.facebook.com/mdsabbirahmed.7510" target="_blank" rel="noopener noreferrer" class="social-link" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+    <a href="https://www.instagram.com/mdsabbirahmed.7510" target="_blank" rel="noopener noreferrer" class="social-link" title="Instagram"><i class="fab fa-instagram"></i></a>
+    <a href="https://www.linkedin.com/in/mdsabbirahmed7510/" target="_blank" rel="noopener noreferrer" class="social-link" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+</div>
+
+<!-- Page -->
+<div class="page-wrap">
+
+    <!-- Top Bar -->
+    <nav class="topbar">
+        <div class="logo-mark">
+            <div class="logo-hex">SA</div>
+            <div class="logo-text">
+                <div class="logo-name">MD. SABBIR AHMED</div>
+                <div class="logo-role">DEVELOPER · INNOVATOR</div>
             </div>
-            <div class="theme-switch-wrapper">
-                <label class="theme-switch" aria-label="Dark/Light mode toggle">
-                    <input type="checkbox" id="themeCheckbox">
-                    <span class="slider"></span>
-                </label>
+        </div>
+        <div class="theme-toggle">
+            <span class="toggle-label" id="themeLabel">DARK</span>
+            <div class="toggle-track" id="toggleTrack" onclick="toggleTheme()">
+                <div class="toggle-thumb" id="toggleThumb">🌙</div>
             </div>
         </div>
+    </nav>
 
-        <div class="explore-text">
-            🚀 Explore my innovative projects
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-eyebrow">✦ Portfolio 2025 · Smart Systems</div>
+        <h1 class="hero-title">
+            <span class="line1">Innovative Projects</span>
+            <span class="line2">Built to Impress</span>
+        </h1>
+        <p class="hero-sub">Explore a curated collection of intelligent systems — from smart parking to scientific computation.</p>
+
+        <div class="scroll-hint">
+            <span>Scroll</span>
+            <div class="scroll-line"></div>
         </div>
+    </section>
 
-        <div class="projects-grid">
-            <a href="parking/index.html" class="project-card" data-project="parking">
-                <div class="project-icon">🚗</div>
-                <h2 class="project-title">Smart Car Parking System</h2>
-                <p class="project-description">Automated parking management with real-time slot tracking and booking system.</p>
-            </a>
+    <!-- 3D Scene -->
+    <div class="scene">
+        <div class="projects-grid cards-animate">
 
-            <a href="tournament/index.html" class="project-card" data-project="tournament">
-                <div class="project-icon">🏆</div>
-                <h2 class="project-title">Tournament Management System</h2>
-                <p class="project-description">Complete tournament organization, match scheduling, and score tracking platform.</p>
-            </a>
-
-            <a href="student/index.html" class="project-card" data-project="student">
-                <div class="project-icon">🧑‍🎓👩‍🎓📚</div>
-                <h2 class="project-title">Student Management System</h2>
-                <p class="project-description">Complete student management system - admission, results, attendance & fee management.</p>
-            </a>
-
-            <a href="#" class="project-card" data-project="calculator" id="scientificCalcTrigger">
-                <div class="project-icon">🧮📐</div>
-                <h2 class="project-title">Scientific Calculator</h2>
-                <p class="project-description">
-                    Advanced scientific calculator with trigonometry, logarithms, exponent & memory functions.
-                </p>
-            </a>
-
-            <!-- NEW Online Food Service Project - Connected to external GitHub page -->
-            <a href="https://mdsabbirahmed7510.github.io/Online-Food-Service/" target="_blank" rel="noopener noreferrer" class="project-card" data-project="foodservice">
-                <div class="project-icon">🍔🍕🥗</div>
-                <h2 class="project-title">Online Food Service</h2>
-                <p class="project-description">
-                    Delicious food ordering platform with dynamic menu, cart management, and seamless checkout experience.
-                </p>
-            </a>
-        </div>
-
-        <div class="footer">
-            <p>© 2025 MD. SABBIR AHMED | All Rights Reserved</p>
-        </div>
-    </div>
-
-    <!-- Fixed Social Icons -->
-    <div class="social-fixed">
-        <a href="https://www.facebook.com/mdsabbirahmed.7510" target="_blank" rel="noopener noreferrer"><i class="fab fa-facebook-f"></i></a>
-        <a href="https://www.instagram.com/mdsabbirahmed.7510" target="_blank" rel="noopener noreferrer"><i class="fab fa-instagram"></i></a>
-        <a href="https://www.linkedin.com/in/mdsabbirahmed7510/" target="_blank" rel="noopener noreferrer"><i class="fab fa-linkedin-in"></i></a>
-    </div>
-
-    <!-- Scientific Calculator Modal (Standalone) -->
-    <div id="calcModal" class="calc-modal">
-        <div class="calculator-panel">
-            <div class="calc-display" id="calcDisplay">0</div>
-            <div class="calc-buttons" id="calcButtonsContainer"></div>
-            <button class="calc-btn close-calc" id="closeCalcModal">Close Calculator</button>
-        </div>
-    </div>
-
-    <script>
-        // ========== SCIENTIFIC CALCULATOR LOGIC ==========
-        let calcExpression = '';
-        let lastResult = null;
-        let memory = 0;
-
-        function updateDisplay() {
-            const displayElem = document.getElementById('calcDisplay');
-            if (displayElem) {
-                displayElem.innerText = calcExpression || '0';
-            }
-        }
-
-        function handleCalcButton(value) {
-            switch(value) {
-                case 'AC':
-                    calcExpression = '';
-                    lastResult = null;
-                    break;
-                case 'C':
-                    calcExpression = calcExpression.slice(0, -1);
-                    break;
-                case '=':
-                    try {
-                        let expr = calcExpression.replace(/×/g, '*').replace(/÷/g, '/');
-                        expr = expr.replace(/sin\(/g, 'Math.sin(').replace(/cos\(/g, 'Math.cos(').replace(/tan\(/g, 'Math.tan(');
-                        expr = expr.replace(/log\(/g, 'Math.log10(').replace(/ln\(/g, 'Math.log(');
-                        expr = expr.replace(/√\(/g, 'Math.sqrt(');
-                        expr = expr.replace(/\^/g, '**');
-                        expr = expr.replace(/π/g, 'Math.PI');
-                        expr = expr.replace(/e/g, 'Math.E');
-                        const result = Function('"use strict";return (' + expr + ')')();
-                        if (isNaN(result) || !isFinite(result)) throw new Error('Invalid Calculation');
-                        calcExpression = result.toString();
-                        lastResult = result;
-                    } catch(e) {
-                        calcExpression = 'Error';
-                    }
-                    break;
-                case 'sin': calcExpression += 'sin('; break;
-                case 'cos': calcExpression += 'cos('; break;
-                case 'tan': calcExpression += 'tan('; break;
-                case 'log': calcExpression += 'log('; break;
-                case 'ln': calcExpression += 'ln('; break;
-                case 'sqrt': calcExpression += '√('; break;
-                case 'pi': calcExpression += 'π'; break;
-                case 'e_const': calcExpression += 'e'; break;
-                case 'pow': calcExpression += '^'; break;
-                case 'MS':
-                    memory = parseFloat(calcExpression) || 0;
-                    break;
-                case 'MR':
-                    calcExpression += memory.toString();
-                    break;
-                case 'MC':
-                    memory = 0;
-                    break;
-                case 'M+':
-                    memory += parseFloat(calcExpression) || 0;
-                    break;
-                default:
-                    calcExpression += value;
-            }
-            if (calcExpression === 'Error') {
-                setTimeout(() => { calcExpression = ''; updateDisplay(); }, 1200);
-            }
-            updateDisplay();
-        }
-
-        function buildCalculatorUI() {
-            const container = document.getElementById('calcButtonsContainer');
-            if (!container) return;
-            const buttons = [
-                'AC','C','MS','MR','MC',
-                '7','8','9','÷','sqrt',
-                '4','5','6','×','^',
-                '1','2','3','-','sin',
-                '0','.','+','=','cos',
-                'tan','log','ln','pi','e_const','M+'
-            ];
-            container.innerHTML = '';
-            buttons.forEach(btn => {
-                const btnElem = document.createElement('button');
-                btnElem.classList.add('calc-btn');
-                if (btn === '=') btnElem.classList.add('equal');
-                if (['÷','×','-','+','^'].includes(btn)) btnElem.classList.add('operator');
-                if (btn === 'AC' || btn === 'C') btnElem.classList.add('clear');
-                if (['sin','cos','tan','log','ln','sqrt','pi','e_const','MS','MR','MC','M+'].includes(btn)) btnElem.classList.add('sci');
-                let displayText = btn;
-                if (btn === '÷') displayText = '÷';
-                if (btn === '×') displayText = '×';
-                if (btn === 'sqrt') displayText = '√';
-                if (btn === 'pi') displayText = 'π';
-                if (btn === 'e_const') displayText = 'e';
-                if (btn === 'MS') displayText = 'MS';
-                if (btn === 'MR') displayText = 'MR';
-                if (btn === 'MC') displayText = 'MC';
-                if (btn === 'M+') displayText = 'M+';
-                btnElem.innerText = displayText;
-                btnElem.addEventListener('click', () => handleCalcButton(btn));
-                container.appendChild(btnElem);
-            });
-        }
-
-        // calculator modal triggers
-        const calcModal = document.getElementById('calcModal');
-        const calcTrigger = document.getElementById('scientificCalcTrigger');
-        const closeCalcBtn = document.getElementById('closeCalcModal');
-
-        if (calcTrigger) {
-            calcTrigger.addEventListener('click', (e) => {
-                e.preventDefault();
-                if (calcModal) calcModal.classList.add('active');
-            });
-        }
-        if (closeCalcBtn) {
-            closeCalcBtn.addEventListener('click', () => {
-                if (calcModal) calcModal.classList.remove('active');
-            });
-        }
-        window.addEventListener('click', (e) => {
-            if (e.target === calcModal) calcModal.classList.remove('active');
-        });
-
-        // ========== WELCOME POPUP ==========
-        window.addEventListener('DOMContentLoaded', function() {
-            buildCalculatorUI();
-            updateDisplay();
-            const popup = document.createElement('div');
-            popup.className = 'popup';
-            popup.innerHTML = `
-                <div class="popup-content">
-                    <div class="welcome-badge">✨ WELCOME ✨</div>
-                    <h2>Hello, I'm</h2>
-                    <div class="popup-name">MD. SABBIR AHMED</div>
-                    <div class="popup-desc">Innovative Developer | Problem Solver | Tech Enthusiast</div>
-                    <button class="popup-close" id="closePopup">Explore My Work →</button>
+            <!-- Card 1: Parking (featured) -->
+            <a href="parking/index.html" class="project-card card-parking">
+                <div class="card-glow-corner"></div>
+                <span class="card-num">01 / 05</span>
+                <div class="card-icon-bg">🚗</div>
+                <div class="card-body" style="margin-top:0.8rem">
+                    <div class="card-tag">Smart System</div>
+                    <h2 class="card-title" style="margin-top:0.6rem">Smart Car Parking System</h2>
+                    <p class="card-desc">Automated parking management with real-time slot tracking and booking system.</p>
                 </div>
-            `;
-            document.body.appendChild(popup);
-            const closeBtn = document.getElementById('closePopup');
-            const closePopupFunc = () => {
-                popup.style.animation = 'fadeOut 0.3s forwards';
-                setTimeout(() => {
-                    if(popup && popup.parentNode) popup.remove();
-                }, 300);
-            };
-            closeBtn.addEventListener('click', closePopupFunc);
-            popup.addEventListener('click', function(e) {
-                if(e.target === popup) closePopupFunc();
-            });
+                <div class="card-footer">
+                    <div class="card-cta">
+                        <span>Explore</span>
+                        <div class="card-cta-arrow">→</div>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Card 2: Tournament -->
+            <a href="tournament/index.html" class="project-card card-tournament">
+                <div class="card-glow-corner"></div>
+                <span class="card-num">02 / 05</span>
+                <div class="card-icon-bg">🏆</div>
+                <div class="card-body" style="margin-top:0.8rem">
+                    <div class="card-tag">Management</div>
+                    <h2 class="card-title" style="margin-top:0.6rem">Tournament System</h2>
+                    <p class="card-desc">Complete tournament organization, match scheduling, and score tracking platform.</p>
+                </div>
+                <div class="card-footer">
+                    <div class="card-cta">
+                        <span>Explore</span>
+                        <div class="card-cta-arrow">→</div>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Card 3: Student -->
+            <a href="student/index.html" class="project-card card-student">
+                <div class="card-glow-corner"></div>
+                <span class="card-num">03 / 05</span>
+                <div class="card-icon-bg">🧑‍🎓</div>
+                <div class="card-body" style="margin-top:0.8rem">
+                    <div class="card-tag">Education</div>
+                    <h2 class="card-title" style="margin-top:0.6rem">Student Management</h2>
+                    <p class="card-desc">Admission, results, attendance & fee management — all in one platform.</p>
+                </div>
+                <div class="card-footer">
+                    <div class="card-cta">
+                        <span>Explore</span>
+                        <div class="card-cta-arrow">→</div>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Card 4: Calculator -->
+            <a href="#" class="project-card card-calculator" id="scientificCalcTrigger">
+                <div class="card-glow-corner"></div>
+                <span class="card-num">04 / 05</span>
+                <div class="card-icon-bg">🧮</div>
+                <div class="card-body" style="margin-top:0.8rem">
+                    <div class="card-tag">Scientific Tool</div>
+                    <h2 class="card-title" style="margin-top:0.6rem">Scientific Calculator</h2>
+                    <p class="card-desc">Trigonometry, logarithms, exponents & memory — advanced computation in your browser.</p>
+                </div>
+                <div class="card-footer">
+                    <div class="card-cta">
+                        <span>Launch</span>
+                        <div class="card-cta-arrow">→</div>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Card 5: Food -->
+            <a href="https://mdsabbirahmed7510.github.io/Online-Food-Service/" target="_blank" rel="noopener noreferrer" class="project-card card-food">
+                <div class="card-glow-corner"></div>
+                <span class="card-num">05 / 05</span>
+                <div class="card-icon-bg">🍔</div>
+                <div class="card-body" style="margin-top:0.8rem">
+                    <div class="card-tag">E-Commerce</div>
+                    <h2 class="card-title" style="margin-top:0.6rem">Online Food Service</h2>
+                    <p class="card-desc">Dynamic menu, cart management, and seamless checkout for delicious food ordering online.</p>
+                </div>
+                <div class="card-footer">
+                    <div class="card-cta">
+                        <span>Visit</span>
+                        <div class="card-cta-arrow">↗</div>
+                    </div>
+                </div>
+            </a>
+
+        </div>
+    </div>
+
+
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-copy">© 2025<span class="footer-dot">·</span>MD. SABBIR AHMED<span class="footer-dot">·</span>ALL RIGHTS RESERVED</div>
+        <div class="footer-copy" style="color:var(--accent-violet); opacity:0.7">DESIGNED WITH ♥</div>
+    </footer>
+
+</div><!-- /page-wrap -->
+
+<!-- Scientific Calculator Modal -->
+<div id="calcModal" class="calc-modal">
+    <div class="calc-panel">
+        <div class="calc-header">
+            <div class="calc-title-bar">
+                <span>🧮</span> Scientific Calculator
+            </div>
+            <button class="calc-close-btn" id="closeCalcBtn">✕</button>
+        </div>
+        <div class="calc-display" id="calcDisplay">0</div>
+        <div class="calc-buttons" id="calcButtonsContainer"></div>
+    </div>
+</div>
+
+<script>
+// ── Canvas Particles ──────────────────────────────
+const canvas = document.getElementById('bgCanvas');
+const ctx = canvas.getContext('2d');
+let W, H, particles = [];
+
+function resize() {
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+const isLight = () => document.body.classList.contains('light');
+
+function createParticles() {
+    particles = [];
+    const count = Math.min(Math.floor(W * H / 14000), 70);
+    for (let i = 0; i < count; i++) {
+        particles.push({
+            x: Math.random() * W,
+            y: Math.random() * H,
+            r: Math.random() * 1.2 + 0.3,
+            vx: (Math.random() - 0.5) * 0.18,
+            vy: (Math.random() - 0.5) * 0.18,
+            alpha: Math.random() * 0.5 + 0.1,
+            hue: Math.random() > 0.5 ? 260 : (Math.random() > 0.5 ? 190 : 350)
         });
+    }
+}
+createParticles();
+window.addEventListener('resize', createParticles);
 
-        // ========== DARK/LIGHT MODE TOGGLE ==========
-        const themeCheckbox = document.getElementById('themeCheckbox');
-        const body = document.body;
-        const sunContainer = document.querySelector('.sun-container');
-        const moonContainer = document.querySelector('.moon-container');
+let mx = -999, my = -999;
+window.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
 
-        function applyTheme(isDark) {
-            if(isDark) {
-                body.classList.remove('light');
-                body.classList.add('dark');
-                sunContainer.style.display = 'none';
-                moonContainer.style.display = 'flex';
-                themeCheckbox.checked = true;
-                localStorage.setItem('theme', 'dark');
-            } else {
-                body.classList.remove('dark');
-                body.classList.add('light');
-                sunContainer.style.display = 'flex';
-                moonContainer.style.display = 'none';
-                themeCheckbox.checked = false;
-                localStorage.setItem('theme', 'light');
+function drawFrame() {
+    ctx.clearRect(0, 0, W, H);
+    const light = isLight();
+
+    particles.forEach(p => {
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
+        if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
+
+        // Cursor attraction
+        const dx = mx - p.x, dy = my - p.y, dist = Math.sqrt(dx*dx+dy*dy);
+        if (dist < 120) { p.x += dx * 0.005; p.y += dy * 0.005; }
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = light
+            ? `hsla(${p.hue},60%,45%,${p.alpha * 0.5})`
+            : `hsla(${p.hue},80%,70%,${p.alpha})`;
+        ctx.fill();
+    });
+
+    // Draw lines between close particles
+    for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const d = Math.sqrt(dx*dx+dy*dy);
+            if (d < 100) {
+                ctx.beginPath();
+                ctx.moveTo(particles[i].x, particles[i].y);
+                ctx.lineTo(particles[j].x, particles[j].y);
+                ctx.strokeStyle = light
+                    ? `rgba(100,60,180,${0.04 * (1 - d/100)})`
+                    : `rgba(139,92,246,${0.08 * (1 - d/100)})`;
+                ctx.lineWidth = 0.5;
+                ctx.stroke();
             }
         }
+    }
+    requestAnimationFrame(drawFrame);
+}
+drawFrame();
 
-        const savedTheme = localStorage.getItem('theme');
-        if(savedTheme === 'dark') applyTheme(true);
-        else applyTheme(false);
+// ── Custom Cursor ──────────────────────────────────
+const dot = document.getElementById('cursorDot');
+const ring = document.getElementById('cursorRing');
+let rx = 0, ry = 0;
 
-        themeCheckbox.addEventListener('change', function(e) {
-            applyTheme(this.checked);
-        });
-        if(sunContainer) sunContainer.addEventListener('click', () => { if(body.classList.contains('light')) applyTheme(true); });
-        if(moonContainer) moonContainer.addEventListener('click', () => { if(body.classList.contains('dark')) applyTheme(false); });
-    </script>
+document.addEventListener('mousemove', e => {
+    dot.style.left = e.clientX + 'px';
+    dot.style.top  = e.clientY + 'px';
+    rx += (e.clientX - rx) * 0.12;
+    ry += (e.clientY - ry) * 0.12;
+    ring.style.left = rx + 'px';
+    ring.style.top  = ry + 'px';
+});
+
+function animRing() {
+    requestAnimationFrame(animRing);
+    ring.style.left = rx + 'px';
+    ring.style.top  = ry + 'px';
+}
+let rAnimId;
+document.addEventListener('mousemove', e => {
+    rx += (e.clientX - rx) * 0.12;
+    ry += (e.clientY - ry) * 0.12;
+});
+(function animLoop() {
+    ring.style.left = rx + 'px';
+    ring.style.top  = ry + 'px';
+    requestAnimationFrame(animLoop);
+})();
+
+document.querySelectorAll('a, button, .toggle-track').forEach(el => {
+    el.addEventListener('mouseenter', () => ring.classList.add('expand'));
+    el.addEventListener('mouseleave', () => ring.classList.remove('expand'));
+});
+
+// ── 3D Card Tilt ──────────────────────────────────
+document.querySelectorAll('.project-card').forEach(card => {
+    card.addEventListener('mousemove', e => {
+        const r = card.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width - 0.5;
+        const y = (e.clientY - r.top) / r.height - 0.5;
+        card.style.transform = `translateY(-10px) rotateX(${-y * 10}deg) rotateY(${x * 10}deg)`;
+        card.style.setProperty('--mx', `${(e.clientX - r.left) / r.width * 100}%`);
+        card.style.setProperty('--my', `${(e.clientY - r.top) / r.height * 100}%`);
+    });
+    card.addEventListener('mouseleave', () => {
+        card.style.transform = '';
+    });
+});
+
+// ── Theme Toggle ──────────────────────────────────
+let isDark = true;
+function toggleTheme() {
+    isDark = !isDark;
+    const body = document.body;
+    const track = document.getElementById('toggleTrack');
+    const thumb = document.getElementById('toggleThumb');
+    const label = document.getElementById('themeLabel');
+    if (isDark) {
+        body.classList.remove('light'); body.classList.add('dark');
+        track.classList.remove('active');
+        thumb.textContent = '🌙';
+        label.textContent = 'DARK';
+        localStorage.setItem('theme', 'dark');
+    } else {
+        body.classList.remove('dark'); body.classList.add('light');
+        track.classList.add('active');
+        thumb.textContent = '☀️';
+        label.textContent = 'LIGHT';
+        localStorage.setItem('theme', 'light');
+    }
+}
+
+// Restore saved theme
+const saved = localStorage.getItem('theme');
+if (saved === 'light') toggleTheme();
+
+// ── Scientific Calculator ─────────────────────────
+let expr = '', mem = 0;
+
+function updateDisplay() {
+    document.getElementById('calcDisplay').textContent = expr || '0';
+}
+
+function handleBtn(v) {
+    switch(v) {
+        case 'AC': expr = ''; break;
+        case 'C':  expr = expr.slice(0, -1); break;
+        case '=':
+            try {
+                let e = expr.replace(/×/g,'*').replace(/÷/g,'/')
+                    .replace(/sin\(/g,'Math.sin(').replace(/cos\(/g,'Math.cos(')
+                    .replace(/tan\(/g,'Math.tan(').replace(/log\(/g,'Math.log10(')
+                    .replace(/ln\(/g,'Math.log(').replace(/√\(/g,'Math.sqrt(')
+                    .replace(/\^/g,'**').replace(/π/g,'Math.PI').replace(/\be\b/g,'Math.E');
+                const res = Function('"use strict";return('+e+')')();
+                if (!isFinite(res) || isNaN(res)) throw 0;
+                expr = res.toString();
+            } catch { expr = 'Error'; setTimeout(()=>{expr='';updateDisplay();},1200); }
+            break;
+        case 'sin': expr+='sin('; break;
+        case 'cos': expr+='cos('; break;
+        case 'tan': expr+='tan('; break;
+        case 'log': expr+='log('; break;
+        case 'ln':  expr+='ln('; break;
+        case 'sqrt':expr+='√('; break;
+        case 'pi':  expr+='π'; break;
+        case 'e_c': expr+='e'; break;
+        case 'pow': expr+='^'; break;
+        case 'MS':  mem=parseFloat(expr)||0; break;
+        case 'MR':  expr+=mem.toString(); break;
+        case 'MC':  mem=0; break;
+        case 'M+':  mem+=parseFloat(expr)||0; break;
+        default: expr+=v;
+    }
+    updateDisplay();
+}
+
+function buildCalc() {
+    const rows = [
+        ['AC','C','MS','MR','MC'],
+        ['7','8','9','÷','sqrt'],
+        ['4','5','6','×','^'],
+        ['1','2','3','-','sin'],
+        ['0','.','=','+','cos'],
+        ['tan','log','ln','pi','e_c','M+']
+    ];
+    const map = { sqrt:'√', pi:'π', e_c:'e', 'M+':'M+', MS:'MS', MR:'MR', MC:'MC' };
+    const cls = {
+        '=':'eq','AC':'clr','C':'clr',
+        '÷':'op','×':'op','-':'op','+':'op','^':'op',
+        sin:'sci',cos:'sci',tan:'sci',log:'sci',ln:'sci',sqrt:'sci',
+        pi:'sci',e_c:'sci',MS:'sci',MR:'sci',MC:'sci','M+':'sci'
+    };
+    const con = document.getElementById('calcButtonsContainer');
+    con.innerHTML = '';
+    rows.flat().forEach(v => {
+        const b = document.createElement('button');
+        b.className = 'calc-btn ' + (cls[v]||'');
+        b.textContent = map[v]||v;
+        b.onclick = ()=>handleBtn(v);
+        con.appendChild(b);
+    });
+}
+
+const calcModal = document.getElementById('calcModal');
+document.getElementById('scientificCalcTrigger').addEventListener('click', e => {
+    e.preventDefault();
+    calcModal.classList.add('active');
+});
+document.getElementById('closeCalcBtn').addEventListener('click', () => calcModal.classList.remove('active'));
+calcModal.addEventListener('click', e => { if(e.target===calcModal) calcModal.classList.remove('active'); });
+
+// ── Welcome Popup ─────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+    buildCalc();
+    updateDisplay();
+
+    const popup = document.createElement('div');
+    popup.className = 'popup';
+    popup.innerHTML = `
+        <div class="popup-inner">
+            <div class="popup-glow"></div>
+            <div class="popup-badge">✦ &nbsp; Welcome Visitor</div>
+            <div class="popup-heading">Hello, I'm</div>
+            <div class="popup-name">MD. SABBIR AHMED</div>
+            <p class="popup-desc">Innovative Developer · Problem Solver · Tech Enthusiast.<br>Explore a world of smart systems crafted with precision.</p>
+            <div class="popup-roles">
+                <span class="popup-role">⚡ Full-Stack Dev</span>
+                <span class="popup-role">🧠 Systems Architect</span>
+                <span class="popup-role">🚀 Tech Innovator</span>
+            </div>
+            <button class="popup-btn" id="popupClose">Explore My Work &nbsp;→</button>
+        </div>
+    `;
+    document.body.appendChild(popup);
+
+    const close = () => {
+        popup.style.animation = 'fadeOut 0.3s forwards';
+        setTimeout(() => popup.remove(), 300);
+    };
+    document.getElementById('popupClose').onclick = close;
+    popup.onclick = e => { if(e.target===popup) close(); };
+});
+</script>
 </body>
 </html>
